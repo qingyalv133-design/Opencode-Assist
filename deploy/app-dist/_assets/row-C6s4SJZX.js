@@ -1,0 +1,2 @@
+import{b as e,f as t}from"./store-CKe_GNKE.js";import"./provider-group-Cc4WYFU1.js";var n=e(`<div data-component=settings-row><div data-slot=settings-row-copy><div data-slot=settings-row-title></div><div data-slot=settings-row-description></div></div><div data-slot=settings-row-control>`),r=e=>(()=>{var r=n(),i=r.firstChild,a=i.firstChild,o=a.nextSibling,s=i.nextSibling;return t(a,()=>e.title),t(o,()=>e.description),t(s,()=>e.children),r})();export{r as t};
+//# sourceMappingURL=row-C6s4SJZX.js.map

@@ -1,0 +1,2 @@
+import{gt as e}from"./index-BMZqw_eU.js";var t=/^(New session|Child session) - \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;function n(t){return e(t)}function r(e){return e&&(e.match(t)?.[1]??e)}export{r as n,n as t};
+//# sourceMappingURL=title-BJIS9tfm.js.map

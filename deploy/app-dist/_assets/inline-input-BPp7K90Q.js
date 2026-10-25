@@ -1,0 +1,2 @@
+import{_ as e,b as t,et as n,q as r}from"./store-CKe_GNKE.js";var i=t(`<input data-component=inline-input>`);function a(t){let[a,o]=n(t,[`class`,`width`,`style`]),s=()=>a.style?typeof a.style==`string`?a.width?`${a.style};width:${a.width}`:a.style:a.width?{...a.style,width:a.width}:a.style:{width:a.width};return(()=>{var t=i();return e(t,r({get class(){return a.class},get style(){return s()}},o),!1,!1),t})()}export{a as t};
+//# sourceMappingURL=inline-input-BPp7K90Q.js.map

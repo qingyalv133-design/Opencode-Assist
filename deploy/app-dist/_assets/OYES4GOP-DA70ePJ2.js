@@ -1,0 +1,2 @@
+import{H as e,L as t}from"./store-CKe_GNKE.js";import{w as n}from"./5WXHJDCZ-B8cyJnev.js";function r(n,r){let[a,o]=e(i(r?.()));return t(()=>{o(n()?.tagName.toLowerCase()||i(r?.()))}),a}function i(e){return n(e)?e:void 0}export{r as t};
+//# sourceMappingURL=OYES4GOP-DA70ePJ2.js.map

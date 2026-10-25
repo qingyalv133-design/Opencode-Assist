@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: opencode-assist
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      - key: OPENCODE_PASSWORD
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
