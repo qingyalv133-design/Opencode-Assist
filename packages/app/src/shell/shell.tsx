@@ -11,9 +11,11 @@ import { useSettingsSurface } from "@/settings/surface"
 import { useSettings } from "@/settings/model"
 import { ExtensionServerCover } from "@/runtime/extension/server-shell"
 import { ExtensionSlot } from "@/runtime/extension/render"
+import { useCurrentRoute } from "@/shell/state/layout"
 
 export default function Layout(props: ParentProps) {
   const platform = usePlatform()
+  const route = useCurrentRoute()
   const settings = useSettingsSurface()
   const preferences = useSettings()
   const mobile = createMediaQuery("(max-width: 767px)")
@@ -45,7 +47,9 @@ export default function Layout(props: ParentProps) {
             : "max(0px, calc(8px - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))))",
         }}
       >
-        <Titlebar verticalTabs={verticalTabs() ? { mount: state.tabsMount } : undefined} />
+        <Show when={route().type !== "assist"}>
+          <Titlebar verticalTabs={verticalTabs() ? { mount: state.tabsMount } : undefined} />
+        </Show>
         <div class="flex flex-1 min-h-0 min-w-0 flex-row">
           <Show when={verticalTabs()}>
             <aside

@@ -445,6 +445,48 @@ export function Titlebar(props: { verticalTabs?: { mount?: HTMLElement } }) {
               </Show>
             )
 
+            const openAssist = () => navigate("/assist/agent")
+
+            const assistButton = (vertical = false) => (
+              <Show
+                when={vertical}
+                fallback={
+                  <Tooltip placement="bottom" value="OpenCode Assist demo" class="shrink-0">
+                    <IconButton
+                      type="button"
+                      variant="ghost-muted"
+                      size="large"
+                      class="!w-9 shrink-0"
+                      icon={<Icon name="window-analytics" />}
+                      onClick={openAssist}
+                      aria-label="OpenCode Assist demo"
+                    />
+                  </Tooltip>
+                }
+              >
+                <button
+                  type="button"
+                  data-titlebar-tab-action
+                  data-action="vertical-tabs-assist"
+                  class="group mb-1 flex h-7 w-full shrink-0 items-center gap-1.5 rounded-[6px] ps-1.5 pe-2 text-[13px] leading-4 text-v2-text-text-faint hover:text-v2-text-text-base"
+                  onClick={openAssist}
+                  aria-label="OpenCode Assist demo"
+                >
+                  <Icon name="window-analytics" class="shrink-0" />
+                  <span class="min-w-0 truncate">Assist</span>
+                </button>
+              </Show>
+            )
+
+            command.register("assist", () => [
+              {
+                id: "assist.open",
+                title: "OpenCode Assist demo",
+                category: language.t("command.category.view"),
+                onSelect: openAssist,
+              },
+            ])
+
             command.register("titlebar-home", () => [
               {
                 id: "home.toggle",
@@ -540,7 +582,10 @@ export function Titlebar(props: { verticalTabs?: { mount?: HTMLElement } }) {
                 <Show when={windows() || linux()}>
                   <WindowsAppMenu command={command} platform={platform} />
                 </Show>
-                <Show when={!mobile() && !props.verticalTabs}>{homeButton()}</Show>
+                <Show when={!mobile() && !props.verticalTabs}>
+                  {homeButton()}
+                  {assistButton()}
+                </Show>
 
                 <Show
                   when={!mobile()}
@@ -649,6 +694,15 @@ export function Titlebar(props: { verticalTabs?: { mount?: HTMLElement } }) {
                               <Icon name="grid-plus" />
                               {language.t("home.title")}
                             </button>
+                            <button
+                              type="button"
+                              data-action="mobile-tabs-assist"
+                              class="flex h-7 w-full items-center gap-2 rounded-[6px] px-2 text-[13px] leading-4 text-v2-text-text-faint hover:bg-v2-background-bg-layer-02 focus-visible:outline-none focus-visible:bg-v2-background-bg-layer-02"
+                              onClick={openAssist}
+                            >
+                              <Icon name="window-analytics" />
+                              Assist
+                            </button>
                             <div class="flex items-center gap-1">
                               <button
                                 type="button"
@@ -726,6 +780,7 @@ export function Titlebar(props: { verticalTabs?: { mount?: HTMLElement } }) {
                               <ChannelIndicator sidebar />
                             </Show>
                             {homeButton(true)}
+                            {assistButton(true)}
                             <RecentlyClosedTabsMenu
                               vertical
                               onNewTab={openNewTab}

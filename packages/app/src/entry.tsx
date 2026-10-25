@@ -4,6 +4,7 @@ import "@/runtime/polyfills"
 import { init } from "@sentry/solid"
 import { render } from "solid-js/web"
 import { AppBaseProviders, AppInterface } from "@/app"
+import { AssistRoute } from "@/assist/route"
 import { loadInitialLocale } from "@/runtime/i18n/language"
 import { PlatformProvider } from "@/runtime/platform/platform"
 import { createWebPlatform } from "@/runtime/platform/web"
@@ -77,40 +78,46 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 if (root instanceof HTMLElement && root.dataset.opencodeMounted === undefined) {
   // Lazy chunks can import the entry chunk back under a distinct URL, so claim the root before async startup.
   root.dataset.opencodeMounted = ""
-  void loadInitialLocale().then((locale) => {
-    const auth = authFromToken(new URLSearchParams(location.search).get("auth_token"))
-    clearAuthToken()
-    const standalone = isStandalone()
-    root.dataset.standalone = String(standalone)
+  const assistRequested = location.pathname === "/assist" || new URLSearchParams(location.search).get("assist") === "1"
 
-    if (standalone) restorePwaRoute()
+  if (assistRequested) {
+    render(() => <AssistRoute />, root)
+  } else {
+    void loadInitialLocale().then((locale) => {
+      const auth = authFromToken(new URLSearchParams(location.search).get("auth_token"))
+      clearAuthToken()
+      const standalone = isStandalone()
+      root.dataset.standalone = String(standalone)
 
-    const server: ServerConnection.Http | undefined = web.currentServerUrl
-      ? {
-          type: "http",
-          authToken: !!auth,
-          http: {
-            url: web.currentServerUrl,
-            ...auth,
-          },
-        }
-      : undefined
+      if (standalone) restorePwaRoute()
 
-    render(
-      () => (
-        <PlatformProvider value={web.platform}>
-          <AppBaseProviders locale={locale}>
-            <AppInterface
-              canonicalLocalServer={server ? ServerConnection.key(server) : undefined}
-              servers={server ? [server] : []}
-            >
-              <KeyboardInsets />
-              {standalone && <PwaRoutePersistence />}
-            </AppInterface>
-          </AppBaseProviders>
-        </PlatformProvider>
-      ),
-      root,
-    )
-  })
+      const server: ServerConnection.Http | undefined = web.currentServerUrl
+        ? {
+            type: "http",
+            authToken: !!auth,
+            http: {
+              url: web.currentServerUrl,
+              ...auth,
+            },
+          }
+        : undefined
+
+      render(
+        () => (
+          <PlatformProvider value={web.platform}>
+            <AppBaseProviders locale={locale}>
+              <AppInterface
+                canonicalLocalServer={server ? ServerConnection.key(server) : undefined}
+                servers={server ? [server] : []}
+              >
+                <KeyboardInsets />
+                {standalone && <PwaRoutePersistence />}
+              </AppInterface>
+            </AppBaseProviders>
+          </PlatformProvider>
+        ),
+        root,
+      )
+    })
+  }
 }

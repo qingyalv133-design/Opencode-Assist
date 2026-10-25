@@ -23,6 +23,10 @@ const ConnectServerScreen = lazy(() =>
   import("@/servers/connect/screen").then((module) => ({ default: module.ConnectServerScreen })),
 )
 
+const AssistAgentRoute = lazy(() =>
+  import("@/assist/agent-route").then((module) => ({ default: module.AssistAgentRoute })),
+)
+
 const TargetSessionRouteContent = lazy(() =>
   loadSessionRoute().then((module) => ({ default: module.TargetSessionRouteContent })),
 )
@@ -45,6 +49,7 @@ export function AppRoutes() {
     <Route component={AppLayout}>
       <Route path="/" component={Home} />
       <Route path="/settings" component={SettingsScreen} />
+      <Route path="/assist/agent" component={AssistAgentRoute} />
       <Route
         path="/server/:serverKey/session/:id"
         component={() => (
