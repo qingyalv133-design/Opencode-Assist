@@ -504,6 +504,7 @@ export function AssistAgentRoute() {
       if (!data || data.source !== "assist-bridge") return
       if (data.type === "ready") {
         setBridgeReady(true)
+        setStatus("connected agent")
         void postSessions()
         return
       }
