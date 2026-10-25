@@ -36,6 +36,32 @@ function assistBridge() {
   const esc = (value: any) => (win.escapeHtml ? win.escapeHtml(String(value ?? "")) : String(value ?? ""))
   let activeId: string | null = null
 
+  try {
+    const style = document.createElement("style")
+    style.id = "assist-markdown-style"
+    style.textContent = `
+      .oc-msg-text.oc-md { white-space: normal; line-height: 1.72; }
+      .oc-msg-text.oc-md p { margin: 0 0 10px; }
+      .oc-msg-text.oc-md h1 { font-size: 18px; line-height: 1.35; font-weight: 650; margin: 4px 0 10px; color: #F2F6FC; }
+      .oc-msg-text.oc-md h2 { font-size: 16px; line-height: 1.4; font-weight: 650; margin: 18px 0 8px; color: #F2F6FC; }
+      .oc-msg-text.oc-md h3 { font-size: 14.5px; line-height: 1.45; font-weight: 650; margin: 14px 0 6px; color: #EAF1FB; }
+      .oc-msg-text.oc-md h4 { font-size: 13.5px; line-height: 1.45; font-weight: 650; margin: 12px 0 6px; color: #EAF1FB; }
+      .oc-msg-text.oc-md ul, .oc-msg-text.oc-md ol { margin: 4px 0 12px 20px; padding: 0; }
+      .oc-msg-text.oc-md li { margin: 4px 0; padding-left: 2px; }
+      .oc-msg-text.oc-md strong { color: #F5F8FD; font-weight: 650; }
+      .oc-msg-text.oc-md em { color: #DCE7F8; }
+      .oc-msg-text.oc-md code { font-family: var(--font-family-mono, monospace); font-size: 12px; background: #0D1624; border: 1px solid #24344D; border-radius: 5px; padding: 1px 5px; color: #CFE0FF; }
+      .oc-msg-text.oc-md pre { margin: 8px 0 12px; padding: 10px 12px; background: #0A111D; border: 1px solid #22304A; border-radius: 8px; overflow-x: auto; }
+      .oc-msg-text.oc-md pre code { border: 0; background: transparent; padding: 0; font-size: 12px; line-height: 1.6; }
+      .oc-msg-text.oc-md blockquote { margin: 8px 0 12px; padding: 4px 0 4px 12px; border-left: 2px solid #3E5B86; color: #A9BBD5; }
+      .oc-msg-text.oc-md hr { border: 0; border-top: 1px solid #22304A; margin: 14px 0; }
+      .oc-msg-text.oc-md a { color: #8FB4FF; text-decoration: underline; text-underline-offset: 2px; }
+      .oc-md-caret { display: inline-block; width: 7px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #7AA2FF; border-radius: 1px; animation: ocMdCaret 900ms steps(1) infinite; }
+      @keyframes ocMdCaret { 50% { opacity: 0; } }
+    `
+    document.head.appendChild(style)
+  } catch (e) { /* ignore */ }
+
   function enable(on: boolean) {
     const i = input()
     const s = send()
@@ -49,6 +75,9 @@ function assistBridge() {
     if (thinkTimer) clearInterval(thinkTimer)
     thinkTimer = null
     thinkBox = null
+    streams.forEach((state) => { if (state.timer) clearTimeout(state.timer) })
+    streams.clear()
+    clearTyping()
     activeId = null
     win.permPending = null
     const overlay = document.getElementById("perm-overlay")
@@ -214,7 +243,142 @@ function assistBridge() {
     thinkBox = null
   }
 
-  function assistant(message: any) {
+  function clearTyping() {
+    document.querySelectorAll(".oc-typing").forEach((el) => el.remove())
+    try {
+      if (win.hideOcTyping) win.hideOcTyping()
+    } catch (e) { /* ignore */ }
+  }
+
+  function inlineMarkdown(line: string) {
+    let value = esc(line)
+    value = value.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    value = value.replace(/`([^`]+)`/g, "<code>$1</code>")
+    value = value.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
+    value = value.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, "$1<em>$2</em>")
+    return value
+  }
+
+  function renderMarkdown(source: string) {
+    const lines = String(source || "").replace(/\r/g, "").split("\n")
+    const out: string[] = []
+    let list: "ul" | "ol" | null = null
+    let code: string[] | null = null
+    const closeList = () => {
+      if (!list) return
+      out.push("</" + list + ">")
+      list = null
+    }
+    for (const raw of lines) {
+      if (/^```/.test(raw.trim())) {
+        if (code) {
+          out.push("<pre><code>" + esc(code.join("\n")) + "</code></pre>")
+          code = null
+        } else {
+          closeList()
+          code = []
+        }
+        continue
+      }
+      if (code) {
+        code.push(raw)
+        continue
+      }
+      const line = raw.replace(/\s+$/, "")
+      const text = line.trim()
+      if (!text) {
+        closeList()
+        continue
+      }
+      const heading = text.match(/^(#{1,4})\s+(.*)$/)
+      if (heading) {
+        closeList()
+        const level = Math.min(4, heading[1].length)
+        out.push("<h" + level + ">" + inlineMarkdown(heading[2]) + "</h" + level + ">")
+        continue
+      }
+      if (/^[-*•]\s+/.test(text)) {
+        if (list !== "ul") {
+          closeList()
+          out.push("<ul>")
+          list = "ul"
+        }
+        out.push("<li>" + inlineMarkdown(text.replace(/^[-*•]\s+/, "")) + "</li>")
+        continue
+      }
+      const numbered = text.match(/^\d+[.)]\s+(.*)$/)
+      if (numbered) {
+        if (list !== "ol") {
+          closeList()
+          out.push("<ol>")
+          list = "ol"
+        }
+        out.push("<li>" + inlineMarkdown(numbered[1]) + "</li>")
+        continue
+      }
+      if (/^>\s+/.test(text)) {
+        closeList()
+        out.push("<blockquote>" + inlineMarkdown(text.replace(/^>\s+/, "")) + "</blockquote>")
+        continue
+      }
+      if (/^---+$/.test(text)) {
+        closeList()
+        out.push("<hr />")
+        continue
+      }
+      closeList()
+      out.push("<p>" + inlineMarkdown(line) + "</p>")
+    }
+    if (code) out.push("<pre><code>" + esc(code.join("\n")) + "</code></pre>")
+    closeList()
+    return out.join("")
+  }
+
+  const streams = new Map<string, any>()
+
+  function streamInto(id: string, el: HTMLElement, full: string, instant?: boolean) {
+    let state = streams.get(id)
+    if (!state) {
+      state = { target: full, cursor: 0, timer: null as any, el }
+      streams.set(id, state)
+    }
+    state.target = full
+    state.el = el
+    if (instant) {
+      if (state.timer) clearTimeout(state.timer)
+      state.timer = null
+      state.cursor = full.length
+      el.innerHTML = renderMarkdown(full)
+      return
+    }
+    if (state.timer) return
+    const tick = () => {
+      const node = state.el as HTMLElement
+      if (!node || !node.isConnected) {
+        if (state.timer) clearTimeout(state.timer)
+        state.timer = null
+        streams.delete(id)
+        return
+      }
+      const target = String(state.target || "")
+      if (state.cursor > target.length) state.cursor = 0
+      let next = target.indexOf("\n", state.cursor)
+      if (next < 0 || next - state.cursor > 140) next = Math.min(target.length, state.cursor + 90)
+      else next += 1
+      state.cursor = Math.min(target.length, next)
+      node.innerHTML = renderMarkdown(target.slice(0, state.cursor)) + (state.cursor < target.length ? '<span class="oc-md-caret"></span>' : "")
+      const c = chat()
+      if (c) c.scrollTop = c.scrollHeight
+      if (state.cursor >= target.length && state.target.length === target.length) {
+        state.timer = null
+        return
+      }
+      state.timer = setTimeout(tick, 45)
+    }
+    state.timer = setTimeout(tick, 0)
+  }
+
+  function assistant(message: any, instant?: boolean) {
     const c = chat()
     if (!c) return
     let el = c.querySelector('[data-assist-message="' + String(message.id).replace(/"/g, "") + '"]') as HTMLElement | null
@@ -223,7 +387,7 @@ function assistBridge() {
       el.className = "oc-msg-assistant"
       el.setAttribute("data-assist-message", message.id)
       el.innerHTML =
-        '<div class="oc-msg-meta">opencode · just now</div><div class="oc-msg-text"></div><div class="assist-tools"></div>'
+        '<div class="oc-msg-meta">opencode · just now</div><div class="oc-msg-text oc-md"></div><div class="assist-tools"></div>'
       c.appendChild(el)
     }
     if (message.reasoning) {
@@ -237,9 +401,15 @@ function assistBridge() {
       }
     }
     const text = el.querySelector(".oc-msg-text") as HTMLElement | null
-    if (text) text.textContent = message.text || ""
+    if (text && (message.text || "")) {
+      clearTyping()
+      streamInto(String(message.id), text, String(message.text), instant)
+    } else if (text && instant) {
+      text.innerHTML = ""
+    }
     const tools = el.querySelector(".assist-tools") as HTMLElement | null
     if (tools) {
+      if ((message.tools || []).length) clearTyping()
       tools.innerHTML = ""
       ;(message.tools || []).forEach((tool: any) => {
         const row = win.ocToolBlock(tool.name || "tool", tool.status || "running")
@@ -266,7 +436,7 @@ function assistBridge() {
       if (item.role === "user") {
         win.appendOcUser(item.text || "")
       } else if (item.role === "assistant") {
-        assistant({ id: item.id, text: item.text, tools: item.tools })
+        assistant({ id: item.id, text: item.text, tools: item.tools }, true)
       }
     })
   }
@@ -337,7 +507,7 @@ function assistBridge() {
         break
       case "done":
         finishThinking()
-        win.hideOcTyping()
+        clearTyping()
         enable(true)
         if (win.ocTrajAdd) {
           win.ocTrajAdd({
@@ -352,7 +522,7 @@ function assistBridge() {
         break
       case "error": {
         finishThinking()
-        win.hideOcTyping()
+        clearTyping()
         enable(true)
         const c = chat()
         if (c) {
@@ -484,12 +654,12 @@ export function AssistAgentRoute() {
     return Array.isArray(body?.data) ? body.data : []
   }
 
-  const postSessions = async () => {
+  const postSessions = async (force = false) => {
     if (!bridgeReady()) return
     try {
       const list = await sessions()
       const signature = JSON.stringify(list.map((s) => [s.id, s.title, s.time?.updated]))
-      if (signature === lastSessions) return
+      if (!force && signature === lastSessions) return
       lastSessions = signature
       post({
         type: "sessions",
@@ -555,7 +725,7 @@ export function AssistAgentRoute() {
     if (!id) throw new Error("OpenCode did not return a session id")
     setActive(id)
     post({ type: "title", title })
-    await postSessions()
+    await postSessions(true)
     return id as string
   }
 
@@ -651,7 +821,7 @@ export function AssistAgentRoute() {
       if (list.at(-1)?.type === "idle") {
         stop()
         post({ type: "done" })
-        await postSessions()
+        await postSessions(true)
         return
       }
     } catch (error: any) {
@@ -711,7 +881,7 @@ export function AssistAgentRoute() {
       showPermissions(requests)
       usage(session)
       for (const message of list) posted.set(message.id, "history")
-      await postSessions()
+      await postSessions(true)
     } catch (error: any) {
       post({ type: "error", message: error?.message || String(error) })
     }
@@ -731,7 +901,7 @@ export function AssistAgentRoute() {
         setBridgeReady(true)
         setStatus("connected agent")
         if (data.settings) setSettings(data.settings as AssistSettings)
-        void postSessions()
+        void postSessions(true)
         return
       }
       if (data.type === "settings" && data.settings) {
@@ -745,7 +915,7 @@ export function AssistAgentRoute() {
       }
       if (data.type === "refresh-sessions") {
         lastSessions = ""
-        void postSessions()
+        void postSessions(true)
         return
       }
       if (data.type === "new-session") {
@@ -753,6 +923,8 @@ export function AssistAgentRoute() {
         setActive(undefined)
         posted = new Map()
         shown = new Set()
+        lastSessions = ""
+        void postSessions(true)
         return
       }
       if (data.type === "select-session" && data.sessionID) {
