@@ -175,14 +175,6 @@ function assistBridge() {
         status: "done",
         meta: "just now",
       },
-      {
-        id: "think",
-        icon: "fa-brain",
-        title: "Thinking it through",
-        detail: "Reading the workspace and planning the next step.",
-        status: "active",
-        meta: "working",
-      },
     ])
   }
 
@@ -210,22 +202,8 @@ function assistBridge() {
     const stream = box.querySelector(".think-stream") as HTMLElement
     const detail = box.querySelector(".think-detail") as HTMLElement
     const chevron = box.querySelector(".think-chevron") as HTMLElement
-    const phrases = (win.THINK_PHRASES && win.THINK_PHRASES.length ? win.THINK_PHRASES : [
-      "Reading your request…",
-      "Checking the workspace…",
-      "Planning the next steps…",
-      "Preparing the tools…",
-    ])
-    let index = 0
-    const show = () => {
-      stream.textContent = phrases[index % phrases.length]
-      index++
-      stream.style.animation = "none"
-      void stream.offsetWidth
-      stream.style.animation = ""
-    }
-    show()
-    thinkTimer = setInterval(show, 480)
+    label.textContent = "Thinking"
+    stream.style.display = "none"
     thinkBox = { box, label, stream, detail, chevron }
   }
 
@@ -344,48 +322,6 @@ function assistBridge() {
 
   const streams = new Map<string, any>()
 
-  function streamInto(id: string, el: HTMLElement, full: string, instant?: boolean) {
-    let state = streams.get(id)
-    if (!state) {
-      state = { target: full, cursor: 0, timer: null as any, el }
-      streams.set(id, state)
-    }
-    state.target = full
-    state.el = el
-    if (instant) {
-      if (state.timer) clearTimeout(state.timer)
-      state.timer = null
-      state.cursor = full.length
-      el.innerHTML = renderMarkdown(full)
-      return
-    }
-    if (state.timer) return
-    const tick = () => {
-      const node = state.el as HTMLElement
-      if (!node || !node.isConnected) {
-        if (state.timer) clearTimeout(state.timer)
-        state.timer = null
-        streams.delete(id)
-        return
-      }
-      const target = String(state.target || "")
-      if (state.cursor > target.length) state.cursor = 0
-      let next = target.indexOf("\n", state.cursor)
-      if (next < 0 || next - state.cursor > 140) next = Math.min(target.length, state.cursor + 90)
-      else next += 1
-      state.cursor = Math.min(target.length, next)
-      node.innerHTML = renderMarkdown(target.slice(0, state.cursor)) + (state.cursor < target.length ? '<span class="oc-md-caret"></span>' : "")
-      const c = chat()
-      if (c) c.scrollTop = c.scrollHeight
-      if (state.cursor >= target.length && state.target.length === target.length) {
-        state.timer = null
-        return
-      }
-      state.timer = setTimeout(tick, 45)
-    }
-    state.timer = setTimeout(tick, 0)
-  }
-
   function assistant(message: any, instant?: boolean) {
     const c = chat()
     if (!c) return
@@ -411,7 +347,7 @@ function assistBridge() {
     const text = el.querySelector(".oc-msg-text") as HTMLElement | null
     if (text && (message.text || "")) {
       clearTyping()
-      streamInto(String(message.id), text, String(message.text), instant)
+      text.innerHTML = renderMarkdown(String(message.text))
     } else if (text && instant) {
       text.innerHTML = ""
     }
@@ -509,7 +445,6 @@ function assistBridge() {
         assistant(data)
         break
       case "typing":
-        startThinking()
         win.showOcTyping()
         break
       case "done":
