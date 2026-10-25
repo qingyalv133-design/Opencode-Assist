@@ -89,6 +89,14 @@ function assistBridge() {
     if (el) el.textContent = title || "New Session"
   }
 
+  let realStats = ""
+
+  function setStats(text: string) {
+    realStats = text
+    const el = document.getElementById("oc-stats")
+    if (el && el.textContent !== text) el.textContent = text
+  }
+
   function sessions(list: SessionOption[]) {
     const el = document.getElementById("oc-session-list")
     if (!el) return
@@ -491,8 +499,7 @@ function assistBridge() {
     switch (data.type) {
       case "sessions": {
         sessions(data.sessions || [])
-        const stats = document.getElementById("oc-stats")
-        if (stats && data.stats) stats.textContent = data.stats.sessions + " sessions · $" + Number(data.stats.cost || 0).toFixed(2)
+        if (data.stats) setStats(data.stats.sessions + " sessions · $" + Number(data.stats.cost || 0).toFixed(2))
         break
       }
       case "history":
@@ -565,6 +572,12 @@ function assistBridge() {
         break
     }
   })
+
+  setInterval(function () {
+    if (!realStats) return
+    const el = document.getElementById("oc-stats")
+    if (el && el.textContent !== realStats) el.textContent = realStats
+  }, 800)
 
   const version = win.document.querySelector(".oc-version")
   if (version) version.textContent = "Assist"
