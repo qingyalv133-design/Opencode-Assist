@@ -12,7 +12,10 @@ function ensureLocalIcons(event: Event) {
   const link = doc.createElement("link")
   link.id = "oc-local-fontawesome"
   link.rel = "stylesheet"
-  link.href = "/assist-assets/fontawesome/css/all.min.css"
+  const local = location.hostname === "localhost" || location.hostname === "127.0.0.1" || !/^https?:$/.test(location.protocol)
+  link.href = local
+    ? "/assist-assets/fontawesome/css/all.min.css"
+    : "https://opencode-assist-assets.surge.sh/fontawesome/css/all-embedded.css"
   doc.head.appendChild(link)
 }
 
