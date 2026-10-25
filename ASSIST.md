@@ -4,9 +4,12 @@ This branch embeds the optimized dark **Assist** workspace into the real OpenCod
 
 ## What is live
 
-- Titlebar **Assist** opens `/assist/agent`.
+- Opening `/` redirects to `/assist/agent`, so the first screen is the Assist onboarding (step 1 of 6), not the empty OpenCode home.
+- Titlebar **Assist** also opens `/assist/agent`.
 - The demo's Workspace composer talks to a real OpenCode server session.
 - Real assistant replies, `write` / `shell` tools, permission approvals, session list, new session and history are bridged into the original demo UI.
+- Real model reasoning is rendered in the demo's thinking box.
+- Write/edit/shell actions use the demo's real approval/risk card (sessions are created with an ask policy).
 - The demo HTML/CSS/animations are unchanged; the file hash is:
 
 ```text
