@@ -3,6 +3,10 @@ import { Icon } from "@opencode/ui/icon"
 import { useServers } from "@/runtime/server/registry"
 
 type SessionOption = { id: string; title: string; time_updated: number }
+type AssistSettings = {
+  policy?: { categories?: Record<string, string> }
+  state?: { identity?: string; capLevel?: string; explainStyle?: string; budget?: number }
+}
 
 function ensureLocalIcons(event: Event) {
   const doc = (event.currentTarget as HTMLIFrameElement).contentDocument
@@ -90,6 +94,61 @@ function assistBridge() {
     })
   }
 
+  function currentSettings() {
+    try {
+      const policy = win.riskPolicyGet ? win.riskPolicyGet() : null
+      const state = win.state
+      return {
+        policy,
+        state: state
+          ? { identity: state.identity, capLevel: state.capLevel, explainStyle: state.explainStyle, budget: state.budget }
+          : null,
+      }
+    } catch (e) {
+      return null
+    }
+  }
+
+  function plainTool(tool: any) {
+    const name = String(tool.name || "tool")
+    const input = tool.input ? String(tool.input).slice(0, 160) : ""
+    if (name === "shell" || name === "bash") {
+      return { icon: "fa-terminal", title: "Ran a command", detail: input || "Ran a command in your workspace." }
+    }
+    if (name === "write" || name === "edit" || name === "patch") {
+      return { icon: "fa-pen-to-square", title: "Changed a file", detail: input || "Changed a project file." }
+    }
+    if (name === "read" || name === "grep" || name === "glob" || name === "list") {
+      return { icon: "fa-file-lines", title: "Looked at your files", detail: input || "Read project context." }
+    }
+    if (name === "webfetch" || name === "websearch") {
+      return { icon: "fa-globe", title: "Looked something up", detail: input || "Used the web." }
+    }
+    return { icon: "fa-circle-check", title: name, detail: input || "Ran " + name + "." }
+  }
+
+  function resetTrajectory(text: string) {
+    if (!win.ocTrajReset) return
+    win.ocTrajReset([
+      {
+        id: "request",
+        icon: "fa-comment-dots",
+        title: "Understood your request",
+        detail: 'You asked: "' + text.slice(0, 160) + '". I will work through it step by step.',
+        status: "done",
+        meta: "just now",
+      },
+      {
+        id: "think",
+        icon: "fa-brain",
+        title: "Thinking it through",
+        detail: "Reading the workspace and planning the next step.",
+        status: "active",
+        meta: "working",
+      },
+    ])
+  }
+
   let thinkBox: any = null
   let thinkTimer: any = null
 
@@ -167,7 +226,16 @@ function assistBridge() {
         '<div class="oc-msg-meta">opencode · just now</div><div class="oc-msg-text"></div><div class="assist-tools"></div>'
       c.appendChild(el)
     }
-    if (message.reasoning) setReasoning(String(message.reasoning))
+    if (message.reasoning) {
+      setReasoning(String(message.reasoning))
+      if (win.ocTrajUpdate) {
+        win.ocTrajUpdate("think", {
+          detail: String(message.reasoning).split(/\n+/)[0].slice(0, 160),
+          status: "done",
+          meta: "thought",
+        })
+      }
+    }
     const text = el.querySelector(".oc-msg-text") as HTMLElement | null
     if (text) text.textContent = message.text || ""
     const tools = el.querySelector(".assist-tools") as HTMLElement | null
@@ -176,6 +244,17 @@ function assistBridge() {
       ;(message.tools || []).forEach((tool: any) => {
         const row = win.ocToolBlock(tool.name || "tool", tool.status || "running")
         if (row) tools.appendChild(row)
+        const plain = plainTool(tool)
+        if (win.ocTrajAdd) {
+          win.ocTrajAdd({
+            id: "tool-" + (tool.id || tool.name),
+            icon: plain.icon,
+            title: plain.title,
+            detail: plain.detail,
+            status: tool.status === "completed" ? "done" : tool.status === "error" ? "denied" : "active",
+            meta: tool.status || "working",
+          })
+        }
       })
     }
     c.scrollTop = c.scrollHeight
@@ -205,7 +284,8 @@ function assistBridge() {
     i.style.height = ""
     win.showOcTyping()
     enable(false)
-    post("prompt", { text })
+    resetTrajectory(text)
+    post("prompt", { text, settings: currentSettings() })
   }
 
   win.ocNewSession = function (event?: Event) {
@@ -259,6 +339,16 @@ function assistBridge() {
         finishThinking()
         win.hideOcTyping()
         enable(true)
+        if (win.ocTrajAdd) {
+          win.ocTrajAdd({
+            id: "reply",
+            icon: "fa-robot",
+            title: "Prepared your answer",
+            detail: "Checked the result and put the reply together.",
+            status: "done",
+            meta: "done",
+          })
+        }
         break
       case "error": {
         finishThinking()
@@ -306,7 +396,13 @@ function assistBridge() {
     }
   })
 
-  post("ready")
+  const version = win.document.querySelector(".oc-version")
+  if (version) version.textContent = "Assist"
+  try {
+    win.FAKE_SESSIONS = []
+  } catch (e) { /* ignore */ }
+
+  post("ready", { settings: currentSettings() })
   setTimeout(function () {
     post("refresh-sessions")
   }, 1400)
@@ -334,6 +430,7 @@ export function AssistAgentRoute() {
   })
   const [active, setActive] = createSignal<string>()
   const [bridgeReady, setBridgeReady] = createSignal(false)
+  const [settings, setSettings] = createSignal<AssistSettings>()
   const [status, setStatus] = createSignal("connecting…")
   let frame: HTMLIFrameElement | undefined
   let pollTimer: ReturnType<typeof setTimeout> | undefined
@@ -362,6 +459,13 @@ export function AssistAgentRoute() {
     if (auth) headers.Authorization = auth
     if (init.body) headers["Content-Type"] = "application/json"
     const response = await fetch(root + path, { ...init, headers })
+    if (response.status === 401) {
+      if (location.port === "8080" || location.hostname.endsWith("trycloudflare.com")) {
+        location.assign("/login?next=" + encodeURIComponent(location.pathname + location.search))
+        throw new Error("Your session expired. Redirecting to sign in…")
+      }
+      throw new Error("OpenCode authentication failed. Reconnect the server.")
+    }
     if (!response.ok) {
       const text = await response.text().catch(() => "")
       throw new Error(text || `OpenCode server returned ${response.status}`)
@@ -405,6 +509,36 @@ export function AssistAgentRoute() {
     return undefined
   }
 
+  const permissionsFor = (input: AssistSettings | undefined) => {
+    const categories = input?.policy?.categories || {}
+    const strict = (...names: string[]) => {
+      let effect = "ask"
+      for (const name of names) {
+        const value = categories[name] || "ask"
+        if (value === "block") return "deny"
+        if (value === "auto") continue
+        effect = "ask"
+      }
+      return effect
+    }
+    const files = strict("files")
+    const shell = strict("software", "system")
+    const web = strict("privacy")
+    return [
+      { action: "read", resource: "*", effect: "allow" },
+      { action: "grep", resource: "*", effect: "allow" },
+      { action: "glob", resource: "*", effect: "allow" },
+      { action: "list", resource: "*", effect: "allow" },
+      { action: "write", resource: "*", effect: files },
+      { action: "edit", resource: "*", effect: files },
+      { action: "patch", resource: "*", effect: files },
+      { action: "shell", resource: "*", effect: shell },
+      { action: "bash", resource: "*", effect: shell },
+      { action: "webfetch", resource: "*", effect: web },
+      { action: "websearch", resource: "*", effect: web },
+    ]
+  }
+
   const ensureSession = async (text: string) => {
     const current = active()
     if (current) return current
@@ -414,13 +548,7 @@ export function AssistAgentRoute() {
       body: JSON.stringify({
         title,
         ...(directory() ? { location: { directory: directory() } } : {}),
-        permissions: [
-          { action: "shell", resource: "*", effect: "ask" },
-          { action: "bash", resource: "*", effect: "ask" },
-          { action: "write", resource: "*", effect: "ask" },
-          { action: "edit", resource: "*", effect: "ask" },
-          { action: "patch", resource: "*", effect: "ask" },
-        ],
+        permissions: permissionsFor(settings()),
       }),
     })
     const id = body?.data?.id
@@ -455,7 +583,13 @@ export function AssistAgentRoute() {
         .join("\n")
       const tools = (message.content || [])
         .filter((part: any) => part.type === "tool")
-        .map((part: any) => ({ name: part.name, status: part.state?.status }))
+        .map((part: any) => {
+          const input = part.state?.input
+          const summary = input
+            ? String(input.command || input.filePath || input.path || input.query || JSON.stringify(input)).slice(0, 180)
+            : ""
+          return { id: part.id, name: part.name, status: part.state?.status, input: summary }
+        })
       const reasoning = (message.content || [])
         .filter((part: any) => part.type === "reasoning")
         .map((part: any) => part.text)
@@ -514,7 +648,7 @@ export function AssistAgentRoute() {
       render(list)
       showPermissions(requests)
       usage(session)
-      if (list.some((message: any) => message.type === "idle")) {
+      if (list.at(-1)?.type === "idle") {
         stop()
         post({ type: "done" })
         await postSessions()
@@ -596,10 +730,16 @@ export function AssistAgentRoute() {
       if (data.type === "ready") {
         setBridgeReady(true)
         setStatus("connected agent")
+        if (data.settings) setSettings(data.settings as AssistSettings)
         void postSessions()
         return
       }
+      if (data.type === "settings" && data.settings) {
+        setSettings(data.settings as AssistSettings)
+        return
+      }
       if (data.type === "prompt") {
+        if (data.settings) setSettings(data.settings as AssistSettings)
         void prompt(String(data.text || ""))
         return
       }
