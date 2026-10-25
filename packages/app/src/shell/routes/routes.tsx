@@ -26,6 +26,10 @@ const AssistAgentRoute = lazy(() =>
   import("@/assist/agent-route").then((module) => ({ default: module.AssistAgentRoute })),
 )
 
+const AssistAgentLegacyRoute = lazy(() =>
+  import("@/assist/agent-route-legacy").then((module) => ({ default: module.AssistAgentRoute })),
+)
+
 const TargetSessionRouteContent = lazy(() =>
   loadSessionRoute().then((module) => ({ default: module.TargetSessionRouteContent })),
 )
@@ -48,7 +52,14 @@ export function AppRoutes() {
     <Route component={AppLayout}>
       <Route path="/" component={() => <Navigate href="/assist/agent" />} />
       <Route path="/settings" component={SettingsScreen} />
-      <Route path="/assist/agent" component={AssistAgentRoute} />
+      <Route
+        path="/assist/agent"
+        component={() => {
+          const local =
+            location.hostname === "localhost" || location.hostname === "127.0.0.1" || !/^https?:$/.test(location.protocol)
+          return local ? <AssistAgentRoute /> : <AssistAgentLegacyRoute />
+        }}
+      />
       <Route
         path="/server/:serverKey/session/:id"
         component={() => (
