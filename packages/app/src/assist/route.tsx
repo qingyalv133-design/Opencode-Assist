@@ -13,6 +13,7 @@ function ensureLocalIcons(event: Event) {
 }
 
 export function AssistRoute() {
+  const demoVersion = Math.random().toString(36).slice(2)
   return (
     <div data-slot="assist-demo" class="flex h-dvh min-h-0 w-full flex-col bg-[#0A0F1A]">
       <header class="flex h-10 shrink-0 items-center gap-3 border-b border-[#22304A] bg-[#101828] px-3 text-[12px] text-[#9AA6B8]">
@@ -37,7 +38,7 @@ export function AssistRoute() {
         </a>
       </header>
       <iframe
-        src="/assist-demo.html"
+        src={`/assist-demo.html?v=${demoVersion}`}
         title="OpenCode Assist demo"
         class="min-h-0 w-full flex-1 border-0"
         allow="clipboard-read; clipboard-write"

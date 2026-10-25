@@ -39,6 +39,9 @@ function assistBridge() {
   function clear() {
     const c = chat()
     if (c) c.innerHTML = ""
+    if (thinkTimer) clearInterval(thinkTimer)
+    thinkTimer = null
+    thinkBox = null
     activeId = null
     win.permPending = null
     const overlay = document.getElementById("perm-overlay")
@@ -84,6 +87,71 @@ function assistBridge() {
     })
   }
 
+  let thinkBox: any = null
+  let thinkTimer: any = null
+
+  function startThinking() {
+    if (thinkBox) return
+    const c = chat()
+    if (!c) return
+    const box = document.createElement("div")
+    box.className = "think-box"
+    box.innerHTML =
+      '<div class="think-header">' +
+        '<span class="think-label">Thinking…</span>' +
+        '<button type="button" class="think-chevron" aria-label="Expand thinking" aria-expanded="false" inert>' +
+          '<i class="fa-solid fa-chevron-down" aria-hidden="true"></i>' +
+        '</button>' +
+      '</div>' +
+      '<div class="think-stream"></div>' +
+      '<div class="think-detail" style="display:none"></div>'
+    c.appendChild(box)
+    c.scrollTop = c.scrollHeight
+    const label = box.querySelector(".think-label") as HTMLElement
+    const stream = box.querySelector(".think-stream") as HTMLElement
+    const detail = box.querySelector(".think-detail") as HTMLElement
+    const chevron = box.querySelector(".think-chevron") as HTMLElement
+    const phrases = (win.THINK_PHRASES && win.THINK_PHRASES.length ? win.THINK_PHRASES : [
+      "Reading your request…",
+      "Checking the workspace…",
+      "Planning the next steps…",
+      "Preparing the tools…",
+    ])
+    let index = 0
+    const show = () => {
+      stream.textContent = phrases[index % phrases.length]
+      index++
+      stream.style.animation = "none"
+      void stream.offsetWidth
+      stream.style.animation = ""
+    }
+    show()
+    thinkTimer = setInterval(show, 480)
+    thinkBox = { box, label, stream, detail, chevron }
+  }
+
+  function setReasoning(reasoning: string) {
+    if (!reasoning) return
+    startThinking()
+    if (!thinkBox) return
+    thinkBox.detail.innerHTML = reasoning
+      .split(/\n+/)
+      .filter(Boolean)
+      .map((line: string) => "<p>" + esc(line) + "</p>")
+      .join("")
+  }
+
+  function finishThinking() {
+    if (!thinkBox) return
+    if (thinkTimer) clearInterval(thinkTimer)
+    thinkTimer = null
+    thinkBox.label.textContent = "Thought complete"
+    thinkBox.stream.style.display = "none"
+    thinkBox.chevron.removeAttribute("inert")
+    thinkBox.chevron.onclick = function () { win.toggleThinkDetail(thinkBox.box) }
+    thinkBox = null
+  }
+
   function assistant(message: any) {
     const c = chat()
     if (!c) return
@@ -96,6 +164,7 @@ function assistBridge() {
         '<div class="oc-msg-meta">opencode · just now</div><div class="oc-msg-text"></div><div class="assist-tools"></div>'
       c.appendChild(el)
     }
+    if (message.reasoning) setReasoning(String(message.reasoning))
     const text = el.querySelector(".oc-msg-text") as HTMLElement | null
     if (text) text.textContent = message.text || ""
     const tools = el.querySelector(".assist-tools") as HTMLElement | null
@@ -180,13 +249,16 @@ function assistBridge() {
         assistant(data)
         break
       case "typing":
+        startThinking()
         win.showOcTyping()
         break
       case "done":
+        finishThinking()
         win.hideOcTyping()
         enable(true)
         break
       case "error": {
+        finishThinking()
         win.hideOcTyping()
         enable(true)
         const c = chat()
@@ -248,6 +320,7 @@ type SessionInfo = {
 }
 
 export function AssistAgentRoute() {
+  const demoVersion = Math.random().toString(36).slice(2)
   const servers = useServers()
   const server = createMemo(() => {
     const origin = location.origin.replace(/\/+$/, "")
@@ -261,6 +334,7 @@ export function AssistAgentRoute() {
   const [status, setStatus] = createSignal("connecting…")
   let frame: HTMLIFrameElement | undefined
   let pollTimer: ReturnType<typeof setTimeout> | undefined
+  let demoAttempts = 0
   let running = false
   let posted = new Map<string, string>()
   let shown = new Set<string>()
@@ -334,7 +408,17 @@ export function AssistAgentRoute() {
     const title = text.slice(0, 60) || "OpenCode Assist"
     const body = await api("/api/session", {
       method: "POST",
-      body: JSON.stringify({ title, ...(directory() ? { location: { directory: directory() } } : {}) }),
+      body: JSON.stringify({
+        title,
+        ...(directory() ? { location: { directory: directory() } } : {}),
+        permissions: [
+          { action: "shell", resource: "*", effect: "ask" },
+          { action: "bash", resource: "*", effect: "ask" },
+          { action: "write", resource: "*", effect: "ask" },
+          { action: "edit", resource: "*", effect: "ask" },
+          { action: "patch", resource: "*", effect: "ask" },
+        ],
+      }),
     })
     const id = body?.data?.id
     if (!id) throw new Error("OpenCode did not return a session id")
@@ -369,12 +453,16 @@ export function AssistAgentRoute() {
       const tools = (message.content || [])
         .filter((part: any) => part.type === "tool")
         .map((part: any) => ({ name: part.name, status: part.state?.status }))
+      const reasoning = (message.content || [])
+        .filter((part: any) => part.type === "reasoning")
+        .map((part: any) => part.text)
+        .join("\n")
       const error = message.error?.message || ""
-      const key = JSON.stringify([text, tools, error])
+      const key = JSON.stringify([text, tools, reasoning, error])
       if (posted.get(message.id) === key) continue
       posted.set(message.id, key)
       if (!text && tools.length === 0 && !error) continue
-      post({ type: "assistant", id: message.id, text, tools })
+      post({ type: "assistant", id: message.id, text, tools, reasoning })
       if (error) post({ type: "error", message: error })
     }
   }
@@ -572,18 +660,31 @@ export function AssistAgentRoute() {
       </header>
       <iframe
         ref={(el) => (frame = el)}
-        src="/assist-demo.html"
+        src={`/assist-demo.html?v=${demoVersion}`}
         title="OpenCode Assist agent"
         class="min-h-0 w-full flex-1 border-0"
         allow="clipboard-read; clipboard-write"
         onLoad={(event) => {
+          const iframe = event.currentTarget as HTMLIFrameElement
+          const doc = iframe.contentDocument
+          const demo = doc?.defaultView as any
+          if (!doc || typeof demo?.showView !== "function" || doc.scripts.length === 0) {
+            if (demoAttempts++ < 8) {
+              setStatus("loading demo…")
+              window.setTimeout(() => {
+                iframe.src = `/assist-demo.html?v=${Math.random().toString(36).slice(2)}`
+              }, 350)
+            } else {
+              setStatus("demo failed to load")
+            }
+            return
+          }
+          demoAttempts = 0
           ensureLocalIcons(event)
-          const doc = (event.currentTarget as HTMLIFrameElement).contentDocument
-          if (!doc) return
           const script = doc.createElement("script")
           script.textContent = `(${assistBridge.toString()})()`
           doc.head.appendChild(script)
-          setStatus(server() ? "connected agent" : "connecting…")
+          setStatus("connected agent")
         }}
       />
     </div>
