@@ -694,7 +694,7 @@ export const dict = {
   "settings.about.firstPublished": "First published in Missouri, USA",
   "settings.about.firstIllustrated": "First illustrated in London, England",
   "settings.about.website": "www.opencode.ai",
-  "settings.about.description": "OpenCode, the open source coding agent",
+  "settings.about.description": "OpenCode Assist, the open source coding agent",
   "settings.about.trademark": "OpenCode is a registered trademark of Anomaly Innovations, Inc.",
   "settings.about.typeset": "Typeset in Inter and IBM Plex Mono",
   "settings.about.notices.title": "Third-party notices",

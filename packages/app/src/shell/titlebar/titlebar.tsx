@@ -451,7 +451,7 @@ export function Titlebar(props: { verticalTabs?: { mount?: HTMLElement } }) {
               <Show
                 when={vertical}
                 fallback={
-                  <Tooltip placement="bottom" value="OpenCode Assist demo" class="shrink-0">
+                  <Tooltip placement="bottom" value="OpenCode Assist" class="shrink-0">
                     <IconButton
                       type="button"
                       variant="ghost-muted"
@@ -459,7 +459,7 @@ export function Titlebar(props: { verticalTabs?: { mount?: HTMLElement } }) {
                       class="!w-9 shrink-0"
                       icon={<Icon name="window-analytics" />}
                       onClick={openAssist}
-                      aria-label="OpenCode Assist demo"
+                      aria-label="OpenCode Assist"
                     />
                   </Tooltip>
                 }
@@ -481,7 +481,7 @@ export function Titlebar(props: { verticalTabs?: { mount?: HTMLElement } }) {
             command.register("assist", () => [
               {
                 id: "assist.open",
-                title: "OpenCode Assist demo",
+                title: "OpenCode Assist",
                 category: language.t("command.category.view"),
                 onSelect: openAssist,
               },
