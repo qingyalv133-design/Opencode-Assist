@@ -21,7 +21,7 @@ export function AssistRoute() {
     <div data-slot="assist-demo" class="flex h-dvh min-h-0 w-full flex-col bg-[#0A0F1A]">
       <header class="flex h-10 shrink-0 items-center gap-3 border-b border-[#22304A] bg-[#101828] px-3 text-[12px] text-[#9AA6B8]">
         <a
-          href="/"
+          href="/new-session"
           class="inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-[#E6EAF2] transition-colors hover:bg-[#1B2740]"
         >
           <Icon name="outline-arrow-left" size="small" />
