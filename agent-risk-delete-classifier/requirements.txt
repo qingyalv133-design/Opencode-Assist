@@ -1,0 +1,35 @@
+# Python 3.11+ required (this run used 3.12.14).
+# CPU-only. If PyPI download is slow, use:
+#   pip install --index-url https://download.pytorch.org/whl/cpu torch==2.2.2
+torch==2.2.2
+sentence-transformers==3.3.1
+transformers==4.46.3
+tokenizers==0.20.3
+sentencepiece==0.2.0
+safetensors==0.4.5
+huggingface-hub==0.26.2
+numpy==1.26.4
+scipy==1.11.4
+scikit-learn==1.3.2
+joblib==1.4.2
+threadpoolctl==3.5.0
+Pillow==10.4.0
+regex==2024.9.11
+requests==2.32.3
+tqdm==4.66.5
+PyYAML==6.0.2
+packaging==24.1
+filelock==3.16.1
+typing-extensions==4.12.2
+fsspec==2024.10.0
+sympy==1.13.3
+networkx==3.2.1
+jinja2==3.1.4
+MarkupSafe==2.1.5
+charset-normalizer==3.3.2
+idna==3.10
+urllib3==2.2.3
+certifi==2024.8.30
+pytest==8.3.3
+iniconfig==2.0.0
+pluggy==1.5.0

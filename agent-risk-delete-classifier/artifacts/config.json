@@ -1,0 +1,62 @@
+{
+  "model_version": "v1",
+  "selected_model": "tfidf",
+  "model_name": "intfloat/multilingual-e5-small",
+  "model_revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+  "weights_sha256": "1a55775f53449dac10a2bcbc312469fac40b96d53198c407081a831f81c98477",
+  "embedding_prefix": "query: ",
+  "embedder_dir": "artifacts/embedder",
+  "serialization": "v1",
+  "thresholds": {
+    "high": 0.499843,
+    "low": 0.40834,
+    "target_recall": 0.95,
+    "high_val_precision": 0.958333,
+    "high_val_recall": 0.958333,
+    "low_val_false_pass_rate": 0.958333
+  },
+  "validation": {
+    "n": 48,
+    "confirmation_tp": 23,
+    "confirmation_fp": 1,
+    "confirmation_fn": 1,
+    "not_category_tn": 23,
+    "review_count": 1,
+    "confirmation_rate": 0.5,
+    "review_rate": 0.020833,
+    "miss_rate": 0.041667
+  },
+  "selection_rule": "validation-only: both must meet recall>=95%; otherwise use the one that does; if both pass, choose higher validation precision, preferring the simpler TF-IDF on a tie",
+  "training": {
+    "seed": 42,
+    "train_rows": 224,
+    "val_rows": 48,
+    "review_rows_excluded": 80,
+    "selected_C": {
+      "e5": 0.1,
+      "tfidf": 10.0
+    },
+    "feature": "frozen E5 mean pooling + L2; StandardScaler + LogisticRegression",
+    "baseline": "TF-IDF char_wb 2-5 + LogisticRegression"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64"
+  },
+  "data_hashes": {
+    "train_sha256": "5ee228f89dedf5a1f7d505b8eb421520a7960bf366e6eeeeebcfcbce33952abe",
+    "val_sha256": "ebab272c8a9979b14bd0c591e19f5fc2a6a5d5819037c95d4a418b4103b36982",
+    "generated_sha256": "d2e5a6e65da69e6919b5c67d3d3076658a75df419651bc964a8939375daf2c13",
+    "challenge_sha256": "5ab6e3c4579d827508924da6b7952d064498532935d1b6a3ca9c9f641506aaab"
+  },
+  "token_lengths": {
+    "max_tokens": 121,
+    "mean_tokens": 74.85,
+    "over_512": 0,
+    "sample_count": 272
+  },
+  "fit_seconds": 3.837,
+  "e5_load_seconds": 0.383,
+  "note": "REVIEW rows are excluded from binary fitting. No model was selected or tuned on test/challenge."
+}

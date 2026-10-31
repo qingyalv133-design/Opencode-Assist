@@ -45,3 +45,24 @@ bun run --cwd packages/desktop dev
 - The old 1.18.x server is not compatible with this 2.1.4 app; use a 2.1.4 server.
 - The public UI preview is at <https://opencode-assist-integrated.surge.sh/>.
 - Product/display name is **OpenCode Assist**; the `opencode` command names are unchanged for compatibility.
+
+## Delete-risk guard (local plugin)
+
+A project-local plugin is installed at:
+
+```text
+.opencode/plugins/delete-risk.js
+```
+
+It hooks `permission.evaluate` for `shell` / `bash` permissions, calls the Python classifier in
+`agent-risk-delete-classifier` (inside this repository; a sibling `../agent-risk-delete-classifier`
+is also supported for local development), and escalates the existing approval card to `ask` when
+the classifier returns `REQUIRE_APPROVAL` or `REVIEW`. If the classifier is unavailable or times
+out, the plugin fails closed and asks for approval. It never executes or auto-approves a command.
+
+Requirements:
+
+- Python environment at `agent-risk-delete-classifier/.venv`
+- Restart the OpenCode/Assist server after installing or changing the plugin
+- Keep the Assist **auto-run** setting off; auto-run may approve pending permission requests
+- The plugin checks shell commands only; it is an extra signal, not a replacement for permissions

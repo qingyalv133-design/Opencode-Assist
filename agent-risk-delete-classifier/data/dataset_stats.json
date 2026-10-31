@@ -1,0 +1,132 @@
+{
+  "generated_rows": 400,
+  "challenge_rows": 100,
+  "generated_label_counts": {
+    "1": 160,
+    "0": 160,
+    "null": 80
+  },
+  "challenge_label_counts": {
+    "1": 50,
+    "0": 30,
+    "null": 20
+  },
+  "split_counts": {
+    "train": 224,
+    "val": 48,
+    "test": 48,
+    "review": 80
+  },
+  "split_label_counts": {
+    "train": {
+      "1": 112,
+      "0": 112
+    },
+    "val": {
+      "1": 24,
+      "0": 24
+    },
+    "test": {
+      "1": 24,
+      "0": 24
+    },
+    "review": {
+      "None": 80
+    }
+  },
+  "reviewed_rows": 80,
+  "reviewed_rows_with_human_signoff": 0,
+  "reviewed_all_false": true,
+  "families": {
+    "train": [
+      "ci_deploy_artifacts",
+      "desktop_file_assistant",
+      "developer_git_cleanup",
+      "docker_host_cleanup",
+      "linux_workspace_cleanup",
+      "log_retention_ops",
+      "media_transcoding_temp",
+      "nas_shared_folders",
+      "node_build_pipeline",
+      "package_cache_cleanup",
+      "photo_archive_manager",
+      "python_automation",
+      "research_dataset_curation",
+      "windows_powershell_admin"
+    ],
+    "val": [
+      "database_backup_ops",
+      "macos_trash_workflow",
+      "scheduled_job_crontab"
+    ],
+    "test": [
+      "cloud_cli_local_mount",
+      "legal_document_retention",
+      "remote_ssh_ops"
+    ],
+    "review": [
+      "ci_deploy_artifacts",
+      "cloud_cli_local_mount",
+      "database_backup_ops",
+      "desktop_file_assistant",
+      "developer_git_cleanup",
+      "docker_host_cleanup",
+      "legal_document_retention",
+      "linux_workspace_cleanup",
+      "log_retention_ops",
+      "macos_trash_workflow",
+      "media_transcoding_temp",
+      "nas_shared_folders",
+      "node_build_pipeline",
+      "package_cache_cleanup",
+      "photo_archive_manager",
+      "python_automation",
+      "remote_ssh_ops",
+      "research_dataset_curation",
+      "scheduled_job_crontab",
+      "windows_powershell_admin"
+    ]
+  },
+  "challenge_families": [
+    "adversarial_test_override",
+    "classroom_materials",
+    "cloud_archive",
+    "data_sync",
+    "docker_volume",
+    "finance_exports",
+    "game_assets_build",
+    "genomics_pipeline",
+    "home_media_server",
+    "legacy_workspace",
+    "mobile_device_sync",
+    "personal_notes_journal",
+    "python_cleanup",
+    "recycle_bin",
+    "three_d_print_models",
+    "tmp_cleanup",
+    "translation_localization",
+    "web_static_deploy",
+    "windows_cleanup"
+  ],
+  "execution_modes": {
+    "execute": 389,
+    "preview": 10,
+    "explain": 1
+  },
+  "tools": {
+    "shell": 268,
+    "filesystem": 31,
+    "filesystem.delete": 13,
+    "unknown": 59,
+    "python": 17,
+    "ci": 1,
+    "ci.delete_artifacts": 1,
+    "nas.delete": 1,
+    "docker": 3,
+    "ssh": 2,
+    "ssh.exec": 1,
+    "cloud": 2,
+    "cloud.delete": 1
+  },
+  "note": "REVIEW rows are excluded from binary fitting; reviewed.jsonl is a synthetic-only audit queue."
+}

@@ -1,0 +1,267 @@
+.venv/bin/python -m src.prepare_data --input data/raw/generated.jsonl
+{
+  "generated_rows": 400,
+  "challenge_rows": 100,
+  "generated_label_counts": {
+    "1": 160,
+    "0": 160,
+    "null": 80
+  },
+  "challenge_label_counts": {
+    "1": 50,
+    "0": 30,
+    "null": 20
+  },
+  "split_counts": {
+    "train": 224,
+    "val": 48,
+    "test": 48,
+    "review": 80
+  },
+  "split_label_counts": {
+    "train": {
+      "1": 112,
+      "0": 112
+    },
+    "val": {
+      "1": 24,
+      "0": 24
+    },
+    "test": {
+      "1": 24,
+      "0": 24
+    },
+    "review": {
+      "None": 80
+    }
+  },
+  "reviewed_rows": 80,
+  "reviewed_rows_with_human_signoff": 0,
+  "reviewed_all_false": true,
+  "families": {
+    "train": [
+      "ci_deploy_artifacts",
+      "desktop_file_assistant",
+      "developer_git_cleanup",
+      "docker_host_cleanup",
+      "linux_workspace_cleanup",
+      "log_retention_ops",
+      "media_transcoding_temp",
+      "nas_shared_folders",
+      "node_build_pipeline",
+      "package_cache_cleanup",
+      "photo_archive_manager",
+      "python_automation",
+      "research_dataset_curation",
+      "windows_powershell_admin"
+    ],
+    "val": [
+      "database_backup_ops",
+      "macos_trash_workflow",
+      "scheduled_job_crontab"
+    ],
+    "test": [
+      "cloud_cli_local_mount",
+      "legal_document_retention",
+      "remote_ssh_ops"
+    ],
+    "review": [
+      "ci_deploy_artifacts",
+      "cloud_cli_local_mount",
+      "database_backup_ops",
+      "desktop_file_assistant",
+      "developer_git_cleanup",
+      "docker_host_cleanup",
+      "legal_document_retention",
+      "linux_workspace_cleanup",
+      "log_retention_ops",
+      "macos_trash_workflow",
+      "media_transcoding_temp",
+      "nas_shared_folders",
+      "node_build_pipeline",
+      "package_cache_cleanup",
+      "photo_archive_manager",
+      "python_automation",
+      "remote_ssh_ops",
+      "research_dataset_curation",
+      "scheduled_job_crontab",
+      "windows_powershell_admin"
+    ]
+  },
+  "challenge_families": [
+    "adversarial_test_override",
+    "classroom_materials",
+    "cloud_archive",
+    "data_sync",
+    "docker_volume",
+    "finance_exports",
+    "game_assets_build",
+    "genomics_pipeline",
+    "home_media_server",
+    "legacy_workspace",
+    "mobile_device_sync",
+    "personal_notes_journal",
+    "python_cleanup",
+    "recycle_bin",
+    "three_d_print_models",
+    "tmp_cleanup",
+    "translation_localization",
+    "web_static_deploy",
+    "windows_cleanup"
+  ],
+  "execution_modes": {
+    "execute": 389,
+    "preview": 10,
+    "explain": 1
+  },
+  "tools": {
+    "shell": 268,
+    "filesystem": 31,
+    "filesystem.delete": 13,
+    "unknown": 59,
+    "python": 17,
+    "ci": 1,
+    "ci.delete_artifacts": 1,
+    "nas.delete": 1,
+    "docker": 3,
+    "ssh": 2,
+    "ssh.exec": 1,
+    "cloud": 2,
+    "cloud.delete": 1
+  },
+  "note": "REVIEW rows are excluded from binary fitting; reviewed.jsonl is a synthetic-only audit queue."
+}
+
+Wrote splits and reviewed queue to /Users/lqyyq/Desktop/opencode-assist/agent-risk-delete-classifier/data
+.venv/bin/python -m src.train
+Encoding train with frozen E5 ...
+Batches:   0%|          | 0/14 [00:00<?, ?it/s]Batches:  14%|█▍        | 2/14 [00:00<00:00, 12.23it/s]Batches:  29%|██▊       | 4/14 [00:00<00:00, 14.54it/s]Batches:  43%|████▎     | 6/14 [00:00<00:00, 15.60it/s]Batches:  57%|█████▋    | 8/14 [00:00<00:00, 16.97it/s]Batches:  79%|███████▊  | 11/14 [00:00<00:00, 19.06it/s]Batches: 100%|██████████| 14/14 [00:00<00:00, 20.20it/s]Batches: 100%|██████████| 14/14 [00:00<00:00, 18.15it/s]
+Encoding validation with frozen E5 ...
+Batches:   0%|          | 0/3 [00:00<?, ?it/s]Batches:  67%|██████▋   | 2/3 [00:00<00:00, 17.78it/s]Batches: 100%|██████████| 3/3 [00:00<00:00, 18.79it/s]
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+=== VALIDATION ===
+{
+  "e5": {
+    "n": 48,
+    "confirmation_tp": 24,
+    "confirmation_fp": 5,
+    "confirmation_fn": 0,
+    "not_category_tn": 14,
+    "review_count": 5,
+    "confirmation_rate": 0.604167,
+    "review_rate": 0.104167,
+    "miss_rate": 0.0
+  },
+  "tfidf": {
+    "n": 48,
+    "confirmation_tp": 23,
+    "confirmation_fp": 1,
+    "confirmation_fn": 1,
+    "not_category_tn": 23,
+    "review_count": 1,
+    "confirmation_rate": 0.5,
+    "review_rate": 0.020833,
+    "miss_rate": 0.041667
+  },
+  "e5_thresholds": {
+    "high": 0.071281,
+    "low": 0.024817,
+    "target_recall": 0.95,
+    "high_val_precision": 0.821429,
+    "high_val_recall": 0.958333,
+    "low_val_false_pass_rate": 0.583333
+  },
+  "tfidf_thresholds": {
+    "high": 0.499843,
+    "low": 0.40834,
+    "target_recall": 0.95,
+    "high_val_precision": 0.958333,
+    "high_val_recall": 0.958333,
+    "low_val_false_pass_rate": 0.958333
+  }
+}
+
+Wrote /Users/lqyyq/Desktop/opencode-assist/agent-risk-delete-classifier/artifacts/classifier.joblib and /Users/lqyyq/Desktop/opencode-assist/agent-risk-delete-classifier/artifacts/config.json
+.venv/bin/python -m src.evaluate
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+{
+  "selected": "tfidf",
+  "gate": {
+    "test_recall_at_least_95pct": true,
+    "challenge_no_direct_pass": true,
+    "challenge_recall_at_least_95pct": true,
+    "review_set_no_auto_pass": true,
+    "challenge_review_no_auto_pass": true,
+    "known_danger_rule_present": true,
+    "passes": true
+  },
+  "test": {
+    "precision": 0.96,
+    "recall": 1.0,
+    "f1": 0.979592,
+    "fn": 0,
+    "direct_pass": 0
+  },
+  "challenge": {
+    "positive": {
+      "n": 50,
+      "approval": 50,
+      "review": 0,
+      "direct_pass": 0,
+      "approval_recall": 1.0,
+      "human_review_or_approval": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "negative": {
+      "n": 30,
+      "approval_false_positive": 3,
+      "review": 2,
+      "pass": 25,
+      "confirmation_rate": 0.1,
+      "review_rate": 0.066667
+    },
+    "review": {
+      "n": 20,
+      "auto_pass": 0,
+      "human_review_or_approval": 20,
+      "safe_routing_rate": 1.0,
+      "exact_review": 10
+    }
+  },
+  "review_set": {
+    "n": 80,
+    "auto_pass": 0,
+    "routed_to_human": 80,
+    "exact_review": 59,
+    "safe_routing_rate": 1.0
+  },
+  "latency": {
+    "p50": 0.331,
+    "p95": 0.41,
+    "mean": 0.337,
+    "batch_32_ms_per_item": 0.143
+  },
+  "rss_peak_mb": 108.38
+}
+.venv/bin/python -m pytest -q
+............                                                             [100%]
+12 passed in 0.01s
+exit=0

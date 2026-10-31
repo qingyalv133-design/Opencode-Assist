@@ -1,0 +1,48 @@
+{
+  "server_version": "2.1.4",
+  "plugin": {
+    "id": "assist-delete-risk",
+    "source": {
+      "type": "local",
+      "path": "/Users/lqyyq/Desktop/opencode-assist/opencode/.opencode/plugins/delete-risk.js"
+    },
+    "features": {
+      "server": true
+    },
+    "state": {
+      "status": "active"
+    }
+  },
+  "cases": [
+    {
+      "command": "rm -rf /tmp/opencode-risk-demo",
+      "effect": "ask",
+      "message": "[删除风险分类器] REQUIRE_APPROVAL · DESTRUCTIVE_DELETE · score=0.807\nindependent known-danger rule requires confirmation 规则：known destructive command: rm -rf /tmp/opencode-risk-demo"
+    },
+    {
+      "command": "find /tmp -type f -name \"*.tmp\" -delete",
+      "effect": "ask",
+      "message": "[删除风险分类器] REQUIRE_APPROVAL · DESTRUCTIVE_DELETE · score=0.871\nindependent known-danger rule requires confirmation 规则：known destructive command: find /tmp -type f -name \"*.tmp\" -delete"
+    },
+    {
+      "command": "ls -la /tmp",
+      "effect": "allow",
+      "message": ""
+    },
+    {
+      "command": "trash /tmp/opencode-risk-demo",
+      "effect": "allow",
+      "message": ""
+    },
+    {
+      "command": "echo \"rm -rf /tmp/opencode-risk-demo\"",
+      "effect": "ask",
+      "message": "[删除风险分类器] REVIEW · REVIEW · score=0.454\nscore is in the review band"
+    }
+  ],
+  "fail_closed": {
+    "effect": "ask",
+    "message": "[删除风险分类器] 无法完成检查（Error: spawn /nonexistent/python ENOENT）。按危险处理，必须人工确认。"
+  },
+  "provider_limit_observed": true
+}

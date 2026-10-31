@@ -1,0 +1,31 @@
+{
+  "test": {
+    "rows": 48,
+    "true": 24,
+    "false": 24,
+    "provisional_true": 0,
+    "human_signed": 0
+  },
+  "challenge": {
+    "rows": 100,
+    "true": 70,
+    "false": 30,
+    "provisional_true": 7,
+    "human_signed": 0
+  },
+  "review": {
+    "rows": 80,
+    "true": 79,
+    "false": 1,
+    "provisional_true": 36,
+    "human_signed": 0
+  },
+  "total": {
+    "rows": 228,
+    "true": 173,
+    "false": 55,
+    "provisional_true": 43,
+    "human_signed": 0
+  },
+  "note": "dangerous=true 包含危险和“无法判断、按危险处理”；provisional=true 表示后者。原 test/challenge/review 文件未被修改；派生文件只添加字段，不改原 label。"
+}

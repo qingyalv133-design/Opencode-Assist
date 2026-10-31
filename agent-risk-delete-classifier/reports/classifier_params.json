@@ -1,0 +1,250 @@
+{
+  "artifact": {
+    "path": "/Users/lqyyq/Desktop/opencode-assist/agent-risk-delete-classifier/artifacts/classifier.joblib",
+    "bytes": 157332,
+    "bundle_type": "dict",
+    "serialization": "v1",
+    "version": "v1",
+    "selected_model": "tfidf"
+  },
+  "config": {
+    "model_name": "intfloat/multilingual-e5-small",
+    "model_revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "embedding_prefix": "query: ",
+    "selected_model": "tfidf",
+    "thresholds": {
+      "high": 0.499843,
+      "low": 0.40834,
+      "target_recall": 0.95,
+      "high_val_precision": 0.958333,
+      "high_val_recall": 0.958333,
+      "low_val_false_pass_rate": 0.958333
+    },
+    "training": {
+      "seed": 42,
+      "train_rows": 224,
+      "val_rows": 48,
+      "review_rows_excluded": 80,
+      "selected_C": {
+        "e5": 0.1,
+        "tfidf": 10.0
+      },
+      "feature": "frozen E5 mean pooling + L2; StandardScaler + LogisticRegression",
+      "baseline": "TF-IDF char_wb 2-5 + LogisticRegression"
+    }
+  },
+  "heads": {
+    "tfidf": {
+      "pipeline_type": "Pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "type": "TfidfVectorizer"
+        },
+        {
+          "name": "clf",
+          "type": "LogisticRegression"
+        }
+      ],
+      "selected_C": 10.0,
+      "thresholds": {
+        "high": 0.499843,
+        "low": 0.40834,
+        "target_recall": 0.95,
+        "high_val_precision": 0.958333,
+        "high_val_recall": 0.958333,
+        "low_val_false_pass_rate": 0.958333
+      },
+      "components": {
+        "tfidf": {
+          "type": "TfidfVectorizer",
+          "params": {
+            "analyzer": "char_wb",
+            "binary": false,
+            "decode_error": "strict",
+            "dtype": "float64",
+            "encoding": "utf-8",
+            "input": "content",
+            "lowercase": true,
+            "max_df": 1.0,
+            "max_features": 100000,
+            "min_df": 1,
+            "ngram_range": [
+              2,
+              5
+            ],
+            "norm": "l2",
+            "preprocessor": null,
+            "smooth_idf": true,
+            "stop_words": null,
+            "strip_accents": null,
+            "sublinear_tf": true,
+            "token_pattern": "(?u)\\b\\w\\w+\\b",
+            "tokenizer": null,
+            "use_idf": true,
+            "vocabulary": null
+          },
+          "vocabulary_size": 10994,
+          "idf": {
+            "shape": [
+              10994
+            ],
+            "min": 1.0,
+            "max": 5.722953221644475
+          }
+        },
+        "clf": {
+          "type": "LogisticRegression",
+          "params": {
+            "C": 10.0,
+            "class_weight": null,
+            "dual": false,
+            "fit_intercept": true,
+            "intercept_scaling": 1,
+            "l1_ratio": null,
+            "max_iter": 5000,
+            "multi_class": "auto",
+            "n_jobs": null,
+            "penalty": "l2",
+            "random_state": 42,
+            "solver": "liblinear",
+            "tol": 0.0001,
+            "verbose": 0,
+            "warm_start": false
+          },
+          "n_features_in_": 10994,
+          "coef_": {
+            "shape": [
+              1,
+              10994
+            ],
+            "values": [
+              0.3603230212166625,
+              0.3603230212166625,
+              0.3603230212166625,
+              0.3603230212166625,
+              -0.18514245716409822,
+              -0.18514245716409822,
+              -0.18514245716409822,
+              -0.18514245716409822
+            ],
+            "note": "first 8 values only"
+          },
+          "intercept_": {
+            "shape": [
+              1
+            ],
+            "values": [
+              -0.5192601145183233
+            ],
+            "note": "all values"
+          },
+          "classes_": {
+            "shape": [
+              2
+            ],
+            "min": 0.0,
+            "max": 1.0
+          }
+        }
+      },
+      "learned_parameters": {
+        "clf.coef_": 10994,
+        "clf.intercept_": 1
+      },
+      "learned_parameter_count": 10995
+    },
+    "e5": {
+      "pipeline_type": "Pipeline",
+      "steps": [
+        {
+          "name": "scale",
+          "type": "StandardScaler"
+        },
+        {
+          "name": "clf",
+          "type": "LogisticRegression"
+        }
+      ],
+      "selected_C": 0.1,
+      "thresholds": {
+        "high": 0.071281,
+        "low": 0.024817,
+        "target_recall": 0.95,
+        "high_val_precision": 0.821429,
+        "high_val_recall": 0.958333,
+        "low_val_false_pass_rate": 0.583333
+      },
+      "components": {
+        "scale": {
+          "type": "StandardScaler",
+          "params": {
+            "copy": true,
+            "with_mean": true,
+            "with_std": true
+          },
+          "n_features_in_": 384
+        },
+        "clf": {
+          "type": "LogisticRegression",
+          "params": {
+            "C": 0.1,
+            "class_weight": null,
+            "dual": false,
+            "fit_intercept": true,
+            "intercept_scaling": 1,
+            "l1_ratio": null,
+            "max_iter": 5000,
+            "multi_class": "auto",
+            "n_jobs": null,
+            "penalty": "l2",
+            "random_state": 42,
+            "solver": "liblinear",
+            "tol": 0.0001,
+            "verbose": 0,
+            "warm_start": false
+          },
+          "n_features_in_": 384,
+          "coef_": {
+            "shape": [
+              1,
+              384
+            ],
+            "values": [
+              0.06281040690591813,
+              0.10210474396588622,
+              -0.030301697515245637,
+              -0.028174425051485836,
+              -0.062239250539944176,
+              0.044718295181737325,
+              -0.012606400483368514,
+              0.029881176565878773
+            ],
+            "note": "first 8 values only"
+          },
+          "intercept_": {
+            "shape": [
+              1
+            ],
+            "values": [
+              0.08021187052123942
+            ],
+            "note": "all values"
+          },
+          "classes_": {
+            "shape": [
+              2
+            ],
+            "min": 0.0,
+            "max": 1.0
+          }
+        }
+      },
+      "learned_parameters": {
+        "clf.coef_": 384,
+        "clf.intercept_": 1
+      },
+      "learned_parameter_count": 385
+    }
+  }
+}

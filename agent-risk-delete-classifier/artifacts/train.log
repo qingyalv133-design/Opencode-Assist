@@ -1,0 +1,57 @@
+.venv/bin/python -m src.train
+Encoding train with frozen E5 ...
+Batches:   0%|          | 0/14 [00:00<?, ?it/s]Batches:  14%|█▍        | 2/14 [00:00<00:00, 12.59it/s]Batches:  29%|██▊       | 4/14 [00:00<00:00, 15.15it/s]Batches:  43%|████▎     | 6/14 [00:00<00:00, 16.63it/s]Batches:  57%|█████▋    | 8/14 [00:00<00:00, 17.79it/s]Batches:  79%|███████▊  | 11/14 [00:00<00:00, 19.60it/s]Batches: 100%|██████████| 14/14 [00:00<00:00, 20.44it/s]Batches: 100%|██████████| 14/14 [00:00<00:00, 18.65it/s]
+Encoding validation with frozen E5 ...
+Batches:   0%|          | 0/3 [00:00<?, ?it/s]Batches:  67%|██████▋   | 2/3 [00:00<00:00, 17.74it/s]Batches: 100%|██████████| 3/3 [00:00<00:00, 17.83it/s]
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+=== VALIDATION ===
+{
+  "e5": {
+    "n": 48,
+    "confirmation_tp": 24,
+    "confirmation_fp": 5,
+    "confirmation_fn": 0,
+    "not_category_tn": 14,
+    "review_count": 5,
+    "confirmation_rate": 0.604167,
+    "review_rate": 0.104167,
+    "miss_rate": 0.0
+  },
+  "tfidf": {
+    "n": 48,
+    "confirmation_tp": 23,
+    "confirmation_fp": 1,
+    "confirmation_fn": 1,
+    "not_category_tn": 23,
+    "review_count": 1,
+    "confirmation_rate": 0.5,
+    "review_rate": 0.020833,
+    "miss_rate": 0.041667
+  },
+  "e5_thresholds": {
+    "high": 0.071281,
+    "low": 0.024817,
+    "target_recall": 0.95,
+    "high_val_precision": 0.821429,
+    "high_val_recall": 0.958333,
+    "low_val_false_pass_rate": 0.583333
+  },
+  "tfidf_thresholds": {
+    "high": 0.499843,
+    "low": 0.40834,
+    "target_recall": 0.95,
+    "high_val_precision": 0.958333,
+    "high_val_recall": 0.958333,
+    "low_val_false_pass_rate": 0.958333
+  }
+}
+
+Wrote /Users/lqyyq/Desktop/opencode-assist/agent-risk-delete-classifier/artifacts/classifier.joblib and /Users/lqyyq/Desktop/opencode-assist/agent-risk-delete-classifier/artifacts/config.json

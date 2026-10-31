@@ -1,0 +1,71 @@
+.venv/bin/python -m src.evaluate
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+{
+  "selected": "tfidf",
+  "gate": {
+    "test_recall_at_least_95pct": true,
+    "challenge_no_direct_pass": true,
+    "challenge_recall_at_least_95pct": true,
+    "review_set_no_auto_pass": true,
+    "challenge_review_no_auto_pass": true,
+    "known_danger_rule_present": true,
+    "passes": true
+  },
+  "test": {
+    "precision": 0.96,
+    "recall": 1.0,
+    "f1": 0.979592,
+    "fn": 0,
+    "direct_pass": 0
+  },
+  "challenge": {
+    "positive": {
+      "n": 50,
+      "approval": 50,
+      "review": 0,
+      "direct_pass": 0,
+      "approval_recall": 1.0,
+      "human_review_or_approval": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "negative": {
+      "n": 30,
+      "approval_false_positive": 3,
+      "review": 2,
+      "pass": 25,
+      "confirmation_rate": 0.1,
+      "review_rate": 0.066667
+    },
+    "review": {
+      "n": 20,
+      "auto_pass": 0,
+      "human_review_or_approval": 20,
+      "safe_routing_rate": 1.0,
+      "exact_review": 10
+    }
+  },
+  "review_set": {
+    "n": 80,
+    "auto_pass": 0,
+    "routed_to_human": 80,
+    "exact_review": 59,
+    "safe_routing_rate": 1.0
+  },
+  "latency": {
+    "p50": 0.325,
+    "p95": 0.461,
+    "mean": 0.344,
+    "batch_32_ms_per_item": 0.141
+  },
+  "rss_peak_mb": 109.22
+}
