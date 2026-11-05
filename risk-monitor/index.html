@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Risk Monitor — OpenCode Assist</title>
+<link rel="stylesheet" href="./risk-monitor.css" />
+</head>
+<body>
+<div class="page">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◈</span>
+      <div>
+        <div class="brand-title">Risk Monitor</div>
+        <div class="brand-sub">A permission layer for agent actions</div>
+      </div>
+    </div>
+    <div class="topbar-meta">
+      <span class="live-dot"></span>
+      <span>Policy active</span>
+      <button class="ghost-btn" id="reset-policy" type="button">Reset</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="overview">
+      <div>
+        <p class="eyebrow">BEFORE ANY TOOL RUNS</p>
+        <h1>Make the consequence visible.</h1>
+        <p class="lede">Six risk categories, three levels of consent. Each action is classified before the agent can read, change, send, install, or delete anything.</p>
+      </div>
+      <div class="overview-stats" id="overview-stats"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="policy-heading">
+      <div class="panel-head">
+        <div>
+          <h2 id="policy-heading">Category policy</h2>
+          <p>Choose how each class of action is handled.</p>
+        </div>
+        <div class="legend">
+          <span><i class="dot dot-auto"></i>Auto</span>
+          <span><i class="dot dot-ask"></i>Ask</span>
+          <span><i class="dot dot-block"></i>Block</span>
+        </div>
+      </div>
+      <div class="risk-grid" id="risk-grid"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="pending-heading">
+      <div class="panel-head">
+        <div>
+          <h2 id="pending-heading">Pending request</h2>
+          <p>A simulated tool call waiting for a decision.</p>
+        </div>
+        <button class="primary-btn" id="simulate" type="button">Simulate permission request</button>
+      </div>
+      <div id="pending-box" class="pending-box empty">
+        <div class="empty-state">
+          <span class="empty-icon">◎</span>
+          <div>
+            <strong>No request in the queue</strong>
+            <p>Simulate a request to see how the policy is applied.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="history-heading">
+      <div class="panel-head">
+        <div>
+          <h2 id="history-heading">Recent decisions</h2>
+          <p>Approvals are kept locally in this browser.</p>
+        </div>
+        <button class="ghost-btn" id="clear-history" type="button">Clear</button>
+      </div>
+      <div id="history" class="history-list"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Extracted Risk Monitor module</span>
+    <span>Demo data · No real tools are executed</span>
+  </footer>
+</div>
+
+<div class="modal-backdrop" id="modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <header class="modal-head">
+      <div class="modal-icon" id="modal-icon">◈</div>
+      <div class="modal-head-main">
+        <p class="eyebrow" id="modal-eyebrow">RISK CATEGORY</p>
+        <h2 id="modal-title"></h2>
+        <p id="modal-summary"></p>
+      </div>
+      <span class="risk-pill" id="modal-risk"></span>
+      <button class="icon-btn" id="modal-close" type="button" aria-label="Close details">✕</button>
+    </header>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="./risk-data.js"></script>
+<script src="./risk-monitor.js"></script>
+</body>
+</html>
